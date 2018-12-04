@@ -283,7 +283,7 @@ namespace Masterloop.Plugin.Device
                 Value = value
             };
             string json = JsonConvert.SerializeObject(o);
-            return PublishObservation(observationId, MessageDataType.BooleanObservation, json);
+            return PublishObservation(observationId, json);
         }
 
         /// <summary>
@@ -301,7 +301,7 @@ namespace Masterloop.Plugin.Device
                 Value = value
             };
             string json = JsonConvert.SerializeObject(o);
-            return PublishObservation(observationId, MessageDataType.DoubleObservation, json);
+            return PublishObservation(observationId, json);
         }
 
         /// <summary>
@@ -319,7 +319,7 @@ namespace Masterloop.Plugin.Device
                 Value = value
             };
             string json = JsonConvert.SerializeObject(o);
-            return PublishObservation(observationId, MessageDataType.IntegerObservation, json);
+            return PublishObservation(observationId, json);
         }
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace Masterloop.Plugin.Device
                 Value = value
             };
             string json = JsonConvert.SerializeObject(o);
-            return PublishObservation(observationId, MessageDataType.PositionObservation, json);
+            return PublishObservation(observationId, json);
         }
 
         /// <summary>
@@ -355,7 +355,7 @@ namespace Masterloop.Plugin.Device
                 Value = value
             };
             string json = JsonConvert.SerializeObject(o);
-            return PublishObservation(observationId, MessageDataType.StringObservation, json);
+            return PublishObservation(observationId, json);
         }
 
         /// <summary>
@@ -463,7 +463,7 @@ namespace Masterloop.Plugin.Device
                     DeliveredAt = timestamp,
                     WasAccepted = wasAccepted
                 };
-                IBasicProperties properties = GetMessageProperties(MessageDataType.CommandResponse, 2);
+                IBasicProperties properties = GetMessageProperties(2);
                 string routingKey = MessageRoutingKey.GenerateDeviceCommandResponseRoutingKey(_MID, command.Id, command.Timestamp);
                 string json = JsonConvert.SerializeObject(response);
                 byte[] body = Encoding.UTF8.GetBytes(json);
@@ -508,7 +508,7 @@ namespace Masterloop.Plugin.Device
                     PulseId = 0  // Devices must always use PulseId = 0
                 };
 
-                IBasicProperties properties = GetMessageProperties(MessageDataType.Pulse, 1);
+                IBasicProperties properties = GetMessageProperties(1);
                 if (expiryMilliseconds > 0)
                 {
                     properties.Expiration = expiryMilliseconds.ToString("F0");
@@ -615,22 +615,18 @@ namespace Masterloop.Plugin.Device
         #endregion
 
         #region InternalMethods
-        private IBasicProperties GetMessageProperties(string dataType, byte deliveryMode)
+        private IBasicProperties GetMessageProperties(byte deliveryMode)
         {
             lock (_modelLock)
             {
                 IBasicProperties properties = _model.CreateBasicProperties();
                 properties.ContentType = "application/json";
                 properties.DeliveryMode = deliveryMode;
-                properties.Headers = new Dictionary<string, object>
-                {
-                    {"type", dataType}
-                };
                 return properties;
             }
         }
 
-        private bool PublishObservation(int observationId, string dataType, string messageBody)
+        private bool PublishObservation(int observationId, string messageBody)
         {
             if (UseAtomicTransactions && _transactionOpen)
             {
@@ -639,7 +635,7 @@ namespace Masterloop.Plugin.Device
             if (IsConnected())
             {
                 string routingKey = MessageRoutingKey.GenerateDeviceObservationRoutingKey(_MID, observationId);
-                IBasicProperties properties = GetMessageProperties(dataType, 2);
+                IBasicProperties properties = GetMessageProperties(2);
                 byte[] bytes = Encoding.UTF8.GetBytes(messageBody);
                 try
                 {
@@ -669,17 +665,6 @@ namespace Masterloop.Plugin.Device
             if (result == null) return new Dictionary<string, object>();
             if (result.BasicProperties == null) return new Dictionary<string, object>();
             return result.BasicProperties.Headers;
-        }
-
-        private static string GetMessageType(IDictionary<string, object> headers)
-        {
-            const string messageTypeDefinition = "type";
-
-            if (headers == null) return string.Empty;
-            if (!headers.ContainsKey(messageTypeDefinition)) return string.Empty;
-
-            byte[] typeAsBytes = (byte[])headers[messageTypeDefinition];
-            return Encoding.UTF8.GetString(typeAsBytes);
         }
 
         private bool Open(LiveConnectionDetails connectionDetails)
@@ -741,43 +726,46 @@ namespace Masterloop.Plugin.Device
 
         bool Dispatch(string routingKey, IDictionary<string, object> headers, byte[] body, ulong deliveryTag)
         {
-            string MID = MessageRoutingKey.ParseMID(routingKey);
-            if (MID == _MID)
+            if (routingKey != null && routingKey.Length > 0)
             {
-                if (GetMessageType(headers) == MessageDataType.Command)
+                string MID = MessageRoutingKey.ParseMID(routingKey);
+                if (MID == _MID)
                 {
-                    string json = Encoding.UTF8.GetString(body);
-                    Command command = JsonConvert.DeserializeObject<Command>(json);
-                    CommandSubscription<Command> cs = _commandSubscriptions.Find(s => s.CommandId == command.Id);
-                    if (cs != null)
+                    if (MessageRoutingKey.IsDeviceCommand(routingKey))
                     {
-                        cs.CommandHandler(MID, command);
-                        lock (_modelLock)
+                        string json = Encoding.UTF8.GetString(body);
+                        Command command = JsonConvert.DeserializeObject<Command>(json);
+                        CommandSubscription<Command> cs = _commandSubscriptions.Find(s => s.CommandId == command.Id);
+                        if (cs != null)
                         {
-                            _model.BasicAck(deliveryTag, false);
+                            cs.CommandHandler(MID, command);
+                            lock (_modelLock)
+                            {
+                                _model.BasicAck(deliveryTag, false);
+                            }
+                            return true;
                         }
-                        return true;
+                    }
+                    else if (MessageRoutingKey.IsApplicationPulse(routingKey))
+                    {
+                        string json = Encoding.UTF8.GetString(body);
+                        Pulse pulse = JsonConvert.DeserializeObject<Pulse>(json);
+                        PulseSubscription ps = _pulseSubscriptions.Find(s => s.PulseId == pulse.PulseId);
+                        if (ps != null)
+                        {
+                            ps.PulseHandler(MID, pulse.PulseId, pulse);
+                            lock (_modelLock)
+                            {
+                                _model.BasicAck(deliveryTag, false);
+                            }
+                            return true;
+                        }
                     }
                 }
-                else if (GetMessageType(headers) == MessageDataType.Pulse)
+                lock (_modelLock)
                 {
-                    string json = Encoding.UTF8.GetString(body);
-                    Pulse pulse = JsonConvert.DeserializeObject<Pulse>(json);
-                    PulseSubscription ps = _pulseSubscriptions.Find(s => s.PulseId == pulse.PulseId);
-                    if (ps != null)
-                    {
-                        ps.PulseHandler(MID, pulse.PulseId, pulse);
-                        lock (_modelLock)
-                        {
-                            _model.BasicAck(deliveryTag, false);
-                        }
-                        return true;
-                    }
+                    _model.BasicNack(deliveryTag, false, false);
                 }
-            }
-            lock (_modelLock)
-            {
-                _model.BasicNack(deliveryTag, false, false);
             }
             return false;
         }
