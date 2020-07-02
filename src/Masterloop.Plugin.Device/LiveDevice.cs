@@ -67,6 +67,8 @@ namespace Masterloop.Plugin.Device
         public bool UseAutomaticCallbacks { get; set; }
 
         public bool UseAtomicTransactions { get; set; }
+
+        public int PrefetchCount { get; set; } = 20;
         #endregion
 
         #region Construction
@@ -269,6 +271,17 @@ namespace Masterloop.Plugin.Device
 
         #region Messaging
         /// <summary>
+        /// Publishes a binary/blob observation to the server. 
+        /// </summary>
+        /// <param name="observationId">Observation identifier.</param>
+        /// <param name="value">Observation byte array value.</param>
+        /// <returns>True if successful, False otherwise.</returns>
+        public bool PublishObservation(int observationId, byte[] value)
+        {
+            return PublishObservationMessage(observationId, value);
+        }
+
+        /// <summary>
         /// Publishes a new time-bound observation value of type 'Boolean' to the server. 
         /// </summary>
         /// <param name="observationId">Observation identifier.</param>
@@ -283,7 +296,7 @@ namespace Masterloop.Plugin.Device
                 Value = value
             };
             string json = JsonConvert.SerializeObject(o);
-            return PublishObservation(observationId, json);
+            return PublishObservationMessage(observationId, Encoding.UTF8.GetBytes(json));
         }
 
         /// <summary>
@@ -301,7 +314,7 @@ namespace Masterloop.Plugin.Device
                 Value = value
             };
             string json = JsonConvert.SerializeObject(o);
-            return PublishObservation(observationId, json);
+            return PublishObservationMessage(observationId, Encoding.UTF8.GetBytes(json));
         }
 
         /// <summary>
@@ -319,7 +332,7 @@ namespace Masterloop.Plugin.Device
                 Value = value
             };
             string json = JsonConvert.SerializeObject(o);
-            return PublishObservation(observationId, json);
+            return PublishObservationMessage(observationId, Encoding.UTF8.GetBytes(json));
         }
 
         /// <summary>
@@ -337,7 +350,7 @@ namespace Masterloop.Plugin.Device
                 Value = value
             };
             string json = JsonConvert.SerializeObject(o);
-            return PublishObservation(observationId, json);
+            return PublishObservationMessage(observationId, Encoding.UTF8.GetBytes(json));
         }
 
         /// <summary>
@@ -355,7 +368,25 @@ namespace Masterloop.Plugin.Device
                 Value = value
             };
             string json = JsonConvert.SerializeObject(o);
-            return PublishObservation(observationId, json);
+            return PublishObservationMessage(observationId, Encoding.UTF8.GetBytes(json));
+        }
+
+        /// <summary>
+        /// Publishes a new time-bound observation value of type 'Statistics' to the server. 
+        /// </summary>
+        /// <param name="observationId">Observation identifier.</param>
+        /// <param name="timestamp">Date and time in UTC.</param>
+        /// <param name="value">Observation value.</param>
+        /// <returns>True if successful, False otherwise.</returns>
+        public bool PublishObservation(int observationId, DateTime timestamp, DescriptiveStatistics value)
+        {
+            StatisticsObservation o = new StatisticsObservation()
+            {
+                Timestamp = timestamp,
+                Value = value
+            };
+            string json = JsonConvert.SerializeObject(o);
+            return PublishObservationMessage(observationId, Encoding.UTF8.GetBytes(json));
         }
 
         /// <summary>
@@ -441,9 +472,11 @@ namespace Masterloop.Plugin.Device
         /// </summary>
         /// <param name="command">Command object to respond to.</param>
         /// <param name="wasAccepted">True if command was accepted, False otherwise.</param>
-        /// <param name="timestamp">Timestamp in UTC when command was accepted. null for current time.</param>
+        /// <param name="timestamp">Timestamp in UTC when command was accepted. null for current time (optional).</param>
+        /// <param name="resultCode">Integer describing result of command execution (optional).</param>
+        /// <param name="comment">Text field of up to 1024 characters for additional free text information (optional).</param>
         /// <returns>True if successful, False otherwise.</returns>
-        public bool PublishCommandResponse(Command command, Boolean wasAccepted = true, DateTime? timestamp = null)
+        public bool PublishCommandResponse(Command command, Boolean wasAccepted = true, DateTime? timestamp = null, int? resultCode = null, string comment = null)
         {
             if (UseAtomicTransactions && _transactionOpen)
             {
@@ -461,7 +494,9 @@ namespace Masterloop.Plugin.Device
                     Id = command.Id,
                     Timestamp = command.Timestamp,
                     DeliveredAt = timestamp,
-                    WasAccepted = wasAccepted
+                    WasAccepted = wasAccepted,
+                    ResultCode = resultCode,
+                    Comment = comment
                 };
                 IBasicProperties properties = GetMessageProperties(2);
                 string routingKey = MessageRoutingKey.GenerateDeviceCommandResponseRoutingKey(_MID, command.Id, command.Timestamp);
@@ -626,7 +661,7 @@ namespace Masterloop.Plugin.Device
             }
         }
 
-        private bool PublishObservation(int observationId, string messageBody)
+        private bool PublishObservationMessage(int observationId, byte[] bytes)
         {
             if (UseAtomicTransactions && _transactionOpen)
             {
@@ -635,8 +670,7 @@ namespace Masterloop.Plugin.Device
             if (IsConnected())
             {
                 string routingKey = MessageRoutingKey.GenerateDeviceObservationRoutingKey(_MID, observationId);
-                IBasicProperties properties = GetMessageProperties(2);
-                byte[] bytes = Encoding.UTF8.GetBytes(messageBody);
+                IBasicProperties properties = GetMessageProperties(1);
                 try
                 {
                     lock (_modelLock)
@@ -707,6 +741,7 @@ namespace Masterloop.Plugin.Device
                     lock (_modelLock)
                     {
                         _model = _connection.CreateModel();
+                        _model.BasicQos(0, (ushort)this.PrefetchCount, false);
                         _transactionOpen = false;
                         return _model != null && _model.IsOpen;
                     }

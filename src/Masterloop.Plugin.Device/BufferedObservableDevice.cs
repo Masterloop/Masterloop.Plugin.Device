@@ -300,6 +300,11 @@ namespace Masterloop.Plugin.Device
                         bo.DataType = (int)DataType.String;
                         bo.Value = (o as StringObservation).Value;
                     }
+                    else if (o.GetType() == typeof(StatisticsObservation))
+                    {
+                        bo.DataType = (int)DataType.Statistics;
+                        bo.Value = DataTypeStringConverter.FormatStatistics((o as StatisticsObservation).Value);
+                    }
                     else
                     {
                         throw new ArgumentException("Unknown observation data type: " + o.GetType().ToString());
@@ -344,6 +349,7 @@ namespace Masterloop.Plugin.Device
                             case DataType.Integer: observation = new IntegerObservation() { Timestamp = bo.Timestamp, Value = DataTypeStringConverter.ParseIntegerValue(bo.Value) }; break;
                             case DataType.Position: observation = new PositionObservation() { Timestamp = bo.Timestamp, Value = DataTypeStringConverter.ParsePositionValue(bo.Value) }; break;
                             case DataType.String: observation = new StringObservation() { Timestamp = bo.Timestamp, Value = bo.Value }; break;
+                            case DataType.Statistics: observation = new StatisticsObservation() { Timestamp = bo.Timestamp, Value = DataTypeStringConverter.ParseStatisticsValue(bo.Value) }; break;
                             default: throw new NotSupportedException("Unknown data type: " + bo.DataType.ToString());
                         }
                         IdentifiedObservation io = new IdentifiedObservation()
