@@ -7,8 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "submodules", "submodules", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masterloop.Plugin.Device", "src\Masterloop.Plugin.Device\Masterloop.Plugin.Device.csproj", "{70DAF686-14A7-4017-AF2D-8330C7D0C99A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masterloop.Core.Types", "submodules\Masterloop.Core.Types\src\Masterloop.Core.Types\Masterloop.Core.Types.csproj", "{C8989F3E-75BA-4528-8D0A-D591D3641308}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D29CA376-8F01-42D0-A83D-5D571B04DD84}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
@@ -25,13 +23,8 @@ Global
 		{70DAF686-14A7-4017-AF2D-8330C7D0C99A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70DAF686-14A7-4017-AF2D-8330C7D0C99A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70DAF686-14A7-4017-AF2D-8330C7D0C99A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8989F3E-75BA-4528-8D0A-D591D3641308}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8989F3E-75BA-4528-8D0A-D591D3641308}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8989F3E-75BA-4528-8D0A-D591D3641308}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8989F3E-75BA-4528-8D0A-D591D3641308}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{70DAF686-14A7-4017-AF2D-8330C7D0C99A} = {63132995-1D80-4630-A5EF-6C27AC240C51}
-		{C8989F3E-75BA-4528-8D0A-D591D3641308} = {2E75AAB5-F3AD-493A-A17F-4E45FF124EBC}
 	EndGlobalSection
 EndGlobal
