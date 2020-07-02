@@ -5,7 +5,7 @@ This repo contains source code to the Masterloop Device Plugin library.
 ## How to build
 
 ### Prerequisites
-- Visual Studio
+- Visual Studio or other editor
 - Windows, Mac or Linux
 - Git
 - .NET Framework, Mono, .NET Core
