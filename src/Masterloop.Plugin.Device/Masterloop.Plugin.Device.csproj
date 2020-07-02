@@ -8,15 +8,20 @@
     <Product>Masterloop Device Plugin</Product>
     <Authors>Masterloop</Authors>
     <Description>Plugin to connect .NET/Mono/Core based devices to Masterloop Cloud Services</Description>
-    <Copyright>Copyright (c) 2013-2018 Masterloop</Copyright>
+    <Copyright>Copyright (c) 2013 Masterloop</Copyright>
     <PackageLicenseUrl>http://masterloop.azurewebsites.net/Licenses/masterloop-mit-license.txt</PackageLicenseUrl>
-    <PackageProjectUrl>http://www.masterloop.com/</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Masterloop/Masterloop.Plugin.Device</PackageProjectUrl>
     <PackageIconUrl>http://masterloop.azurewebsites.net/Images/Masterloop_Symbol_Square_32x32.png</PackageIconUrl>
     <PackageTags>IoT Masterloop Device Plugin</PackageTags>
     <PackageReleaseNotes>Converted to .NET Standard 2.0 library</PackageReleaseNotes>
     <AssemblyVersion>5.3.0.0</AssemblyVersion>
     <FileVersion>5.3.0.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <ReleaseVersion>6.0.0</ReleaseVersion>
+    <PackageVersion>6.0.0</PackageVersion>
+    <Owners>jhskailand</Owners>
+    <Summary>Plugin to connect .NET/Mono/Core based devices to Masterloop Cloud Services</Summary>
+    <Title>Masterloop.Plugin.Application</Title>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="LiteDB" Version="4.1.4" />
