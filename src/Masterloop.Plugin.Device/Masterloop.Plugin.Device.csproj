@@ -3,7 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Masterloop.Plugin.Device</AssemblyName>
     <RootNamespace>Masterloop.Plugin.Device</RootNamespace>
-    <Version>5.3.0</Version>
+    <Version>6.0.1</Version>
     <Company>Masterloop</Company>
     <Product>Masterloop Device Plugin</Product>
     <Authors>Masterloop</Authors>
@@ -14,11 +14,11 @@
     <PackageIconUrl>http://masterloop.azurewebsites.net/Images/Masterloop_Symbol_Square_32x32.png</PackageIconUrl>
     <PackageTags>IoT Masterloop Device Plugin</PackageTags>
     <PackageReleaseNotes>Converted to .NET Standard 2.0 library</PackageReleaseNotes>
-    <AssemblyVersion>5.3.0.0</AssemblyVersion>
-    <FileVersion>5.3.0.0</FileVersion>
+    <AssemblyVersion>6.0.1.0</AssemblyVersion>
+    <FileVersion>6.0.1.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <ReleaseVersion>6.0.0</ReleaseVersion>
-    <PackageVersion>6.0.0</PackageVersion>
+    <ReleaseVersion>6.0.1</ReleaseVersion>
+    <PackageVersion>6.0.1</PackageVersion>
     <Owners>jhskailand</Owners>
     <Summary>Plugin to connect .NET/Mono/Core based devices to Masterloop Cloud Services</Summary>
     <Title>Masterloop.Plugin.Application</Title>
@@ -27,6 +27,7 @@
     <PackageReference Include="LiteDB" Version="4.1.4" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
+    <PackageReference Include="Masterloop.Core.Types" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\submodules\Masterloop.Core.Types\src\Masterloop.Core.Types\Masterloop.Core.Types.csproj" />
