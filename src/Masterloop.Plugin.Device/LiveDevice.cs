@@ -630,14 +630,14 @@ namespace Masterloop.Plugin.Device
                 {
                     while (true)
                     {
-                        BasicGetResult result = _model.BasicGet(_rmqQueueName, false);
-                        if (result == null)
+                        BasicGetResult message = _model.BasicGet(_rmqQueueName, false);
+                        if (message == null)
                         {
                             return;
                         }
                         else
                         {
-                            Dispatch(result.RoutingKey, GetMessageHeader(result), result.Body, result.DeliveryTag);
+                            Dispatch(message.RoutingKey, GetMessageHeader(message), message.Body.Span, message.DeliveryTag);
                         }
                     }
                 }
@@ -717,7 +717,7 @@ namespace Masterloop.Plugin.Device
                     HostName = connectionDetails.Server,
                     UserName = _MID,
                     Password = _preSharedKey,
-                    RequestedHeartbeat = _heartbeatInterval,
+                    RequestedHeartbeat = new TimeSpan(0, 0, _heartbeatInterval),
                     Ssl = ssl,
                 };
             }
@@ -728,7 +728,7 @@ namespace Masterloop.Plugin.Device
                     HostName = connectionDetails.Server,
                     UserName = _MID,
                     Password = _preSharedKey,
-                    RequestedHeartbeat = _heartbeatInterval
+                    RequestedHeartbeat = new TimeSpan(0, 0, _heartbeatInterval)
                 };
             }
 
@@ -756,15 +756,15 @@ namespace Masterloop.Plugin.Device
 
         private void ConsumerReceived(object sender, BasicDeliverEventArgs args)
         {
-            Dispatch(args.RoutingKey, GetMessageHeader(args), args.Body, args.DeliveryTag);
+            Dispatch(args.RoutingKey, GetMessageHeader(args), args.Body.Span, args.DeliveryTag);
         }
 
-        bool Dispatch(string routingKey, IDictionary<string, object> headers, byte[] body, ulong deliveryTag)
+        bool Dispatch(string routingKey, IDictionary<string, object> headers, ReadOnlySpan<byte> body, ulong deliveryTag)
         {
             if (routingKey != null && routingKey.Length > 0)
             {
                 string MID = MessageRoutingKey.ParseMID(routingKey);
-                if (MID == _MID)
+                if (MID == _MID && body != null && body.Length > 0)
                 {
                     if (MessageRoutingKey.IsDeviceCommand(routingKey))
                     {
