@@ -637,7 +637,7 @@ namespace Masterloop.Plugin.Device
                         }
                         else
                         {
-                            Dispatch(message.RoutingKey, GetMessageHeader(message), message.Body.Span, message.DeliveryTag);
+                            Dispatch(message.RoutingKey, GetMessageHeader(message), message.Body.Span.ToArray(), message.DeliveryTag);
                         }
                     }
                 }
@@ -756,10 +756,10 @@ namespace Masterloop.Plugin.Device
 
         private void ConsumerReceived(object sender, BasicDeliverEventArgs args)
         {
-            Dispatch(args.RoutingKey, GetMessageHeader(args), args.Body.Span, args.DeliveryTag);
+            Dispatch(args.RoutingKey, GetMessageHeader(args), args.Body.Span.ToArray(), args.DeliveryTag);
         }
 
-        bool Dispatch(string routingKey, IDictionary<string, object> headers, ReadOnlySpan<byte> body, ulong deliveryTag)
+        bool Dispatch(string routingKey, IDictionary<string, object> headers, byte[] body, ulong deliveryTag)
         {
             if (routingKey != null && routingKey.Length > 0)
             {
