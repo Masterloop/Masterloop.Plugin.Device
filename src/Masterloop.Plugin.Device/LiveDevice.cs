@@ -31,19 +31,20 @@ namespace Masterloop.Plugin.Device
         private ushort _heartbeatInterval;
         private bool _disposed;
         private bool _transactionOpen;
-        private const string _addressDeviceLiveConnect = "/api/devices/{0}/liveconnect";
+        private const string _addressDeviceConnect = "/api/devices/{0}/connect";
         private readonly object _modelLock;
         #endregion // Constants
 
         #region Properties
         /// <summary>
-        /// True ignores any SSL certificate errors, False does not ignore any SSL certificate errors.
+        /// True ignores any SSL certificate errors, False does not ignore any SSL certificate errors. Default false.
         /// </summary>
         public bool IgnoreSslCertificateErrors { get; set; }
 
         /// <summary>
         /// Specifies the requested heartbeat interval in seconds. Must be within the range of [60, 3600] seconds. Use 0 to disable heartbeats.
         /// More info can be found here: https://www.rabbitmq.com/heartbeats.html
+        /// Default 60 seconds.
         /// </summary>
         public ushort HeartbeatInterval
         {
@@ -64,11 +65,25 @@ namespace Masterloop.Plugin.Device
             }
         }
 
+        /// <summary>
+        /// Flag indicating if callbacks should be fired immediatelly (true) or when Fetch is explicitly called (false). Default is true.
+        /// </summary>
         public bool UseAutomaticCallbacks { get; set; }
 
+        /// <summary>
+        /// Flag indicating use of atomic / one-by-one message mode (true) or begin/add/commit-rollback transaction communication (false). Default true.
+        /// </summary>
         public bool UseAtomicTransactions { get; set; }
 
+        /// <summary>
+        /// Prefetch count indicating number of messages in-flight between publisher and subscriber. Default 20.
+        /// </summary>
         public int PrefetchCount { get; set; } = 20;
+
+        /// <summary>
+        /// Interval to back off/wait in case connection to broker fails. Set by server upon initial connection. Default 1 minute.
+        /// </summary>
+        public TimeSpan BackOffInterval { get; private set; }
         #endregion
 
         #region Construction
@@ -79,8 +94,9 @@ namespace Masterloop.Plugin.Device
         /// <param name="preSharedKey">Pre shared key for device.</param>
         /// <param name="hostName">MCS host to connect to, e.g. "api.masterloop.net" or "10.0.0.2".</param>
         /// <param name="useHttps">True if using HTTPS (SSL/TLS), False if using HTTP (unencrypted).</param>
-        public LiveDevice(string MID, string preSharedKey, string hostName, bool useHttps = true)
-            : base(MID, preSharedKey, hostName, useHttps)
+        /// <param name="port">Optional overriding of port number for HTTP(S) communication.</param>
+        public LiveDevice(string MID, string preSharedKey, string hostName, bool useHttps = true, ushort? port = null)
+            : base(MID, preSharedKey, hostName, useHttps, port)
         {
             _modelLock = new object();
             _disposed = false;
@@ -95,6 +111,7 @@ namespace Masterloop.Plugin.Device
             Timeout = 30;
             UseAutomaticCallbacks = true;
             UseAtomicTransactions = true;
+            BackOffInterval = new TimeSpan(0, 1, 0);  // Default
         }
 
         /// <summary>
@@ -120,14 +137,19 @@ namespace Masterloop.Plugin.Device
         {
             Disconnect();  // Remove any existing connection objects
             string received;
-            string url = string.Format(_addressDeviceLiveConnect, _MID);
+            string url = string.Format(_addressDeviceConnect, _MID);
             if (Get(url, out received))
             {
                 if (received != null && received.Length > 0)
                 {
-                    LiveConnectionDetails connectionDetails = JsonConvert.DeserializeObject<LiveConnectionDetails>(received);
-                    if (connectionDetails != null)
+                    DeviceConnection connectionDetails = JsonConvert.DeserializeObject<DeviceConnection>(received);
+                    if (connectionDetails != null && connectionDetails.Node != null)
                     {
+                        if (connectionDetails.BackoffSeconds > 0)
+                        {
+                            this.BackOffInterval = new TimeSpan(0, 0, connectionDetails.BackoffSeconds);
+                        }
+
                         // Connect to messaging server.
                         if (Open(connectionDetails))
                         {
@@ -522,6 +544,7 @@ namespace Masterloop.Plugin.Device
         /// Sends a device pulse to the server.
         /// </summary>
         /// <param name="timestamp">Timestamp in UTC indicating the time of the pulse. null for current time.</param>
+        /// <param name="expiryMilliseconds">Expiration time in millisecond for pulse message.</param>
         /// <returns>True if successful, False otherwise.</returns>
         public bool SendPulse(DateTime? timestamp, int expiryMilliseconds = 300000)
         {
@@ -701,9 +724,9 @@ namespace Masterloop.Plugin.Device
             return result.BasicProperties.Headers;
         }
 
-        private bool Open(LiveConnectionDetails connectionDetails)
+        private bool Open(DeviceConnection connectionDetails)
         {
-            if (connectionDetails.UseSsl)
+            if (_useHttps)
             {
                 var ssl = new SslOption();
                 ssl.Enabled = true;
@@ -711,21 +734,23 @@ namespace Masterloop.Plugin.Device
                 {
                     ssl.AcceptablePolicyErrors = SslPolicyErrors.RemoteCertificateNotAvailable | SslPolicyErrors.RemoteCertificateNameMismatch | SslPolicyErrors.RemoteCertificateChainErrors;
                 }
-                ssl.ServerName = connectionDetails.Server;
+                ssl.ServerName = connectionDetails.Node.MQHost;
                 _connectionFactory = new ConnectionFactory
                 {
-                    HostName = connectionDetails.Server,
+                    HostName = connectionDetails.Node.MQHost,
+                    Port = connectionDetails.Node.MQPortEnc,
                     UserName = _MID,
                     Password = _preSharedKey,
                     RequestedHeartbeat = new TimeSpan(0, 0, _heartbeatInterval),
-                    Ssl = ssl,
+                    Ssl = ssl
                 };
             }
             else
             {
                 _connectionFactory = new ConnectionFactory
                 {
-                    HostName = connectionDetails.Server,
+                    HostName = connectionDetails.Node.MQHost,
+                    Port = connectionDetails.Node.MQPortUEnc,
                     UserName = _MID,
                     Password = _preSharedKey,
                     RequestedHeartbeat = new TimeSpan(0, 0, _heartbeatInterval)

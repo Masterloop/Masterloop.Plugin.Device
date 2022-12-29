@@ -44,14 +44,14 @@ namespace Masterloop.Plugin.Device
             {
                 return _lastErrorMessage;
             }
-            set
+            protected set
             {
                 _lastErrorMessage = value;
             }
         }
 
         /// <summary>
-        /// Network timeout in seconds.
+        /// Network timeout in seconds. Default 30 seconds.
         /// </summary>
         public int Timeout { get; set; }
         #endregion  // Properties
@@ -64,7 +64,8 @@ namespace Masterloop.Plugin.Device
         /// <param name="preSharedKey">Pre shared key for device.</param>
         /// <param name="hostName">Host to connect to, e.g. "myserver.example.com" or "10.0.0.2".</param>
         /// <param name="useHttps">True if using HTTPS (SSL/TLS), False if using HTTP (unencrypted).</param>
-        public DeviceBase(string MID, String preSharedKey, String hostName, bool useHttps = true)
+        /// <param name="port">Optional overriding of port number for HTTP(S) communication.</param>
+        public DeviceBase(string MID, String preSharedKey, String hostName, bool useHttps = true, ushort? port = null)
         {
             _hostName = hostName;
             _useHttps = useHttps;
@@ -77,6 +78,12 @@ namespace Masterloop.Plugin.Device
             else
             {
                 _baseAddress = string.Format("http://{0}", hostName);
+            }
+
+            // Append port number if overridden.
+            if (port.HasValue)
+            {
+                _baseAddress += $":{port.Value}";
             }
             Timeout = _defaultTimeout;
         }

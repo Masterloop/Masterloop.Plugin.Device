@@ -19,7 +19,7 @@ namespace Masterloop.Plugin.Device.Tests
         protected static LiveDevice GetLiveDevice()
         {
             IConfiguration config = GetConfig();
-            return new LiveDevice(config["MID"], config["PSK"], config["Hostname"], Boolean.Parse(config["UseHTTPS"]));
+            return new LiveDevice(config["MID"], config["PSK"], config["Hostname"], Boolean.Parse(config["UseHTTPS"]), ushort.Parse(config["Port"]));
         }
 
         protected static string GetMID()

@@ -5,12 +5,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{63132995-1D8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "submodules", "submodules", "{2E75AAB5-F3AD-493A-A17F-4E45FF124EBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masterloop.Plugin.Device", "src\Masterloop.Plugin.Device\Masterloop.Plugin.Device.csproj", "{70DAF686-14A7-4017-AF2D-8330C7D0C99A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D29CA376-8F01-42D0-A83D-5D571B04DD84}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 		LICENSE.txt = LICENSE.txt
+		MLSymbol.png = MLSymbol.png
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masterloop.Core.Types", "submodules\Masterloop.Core.Types\src\Masterloop.Core.Types\Masterloop.Core.Types.csproj", "{F7B0ED83-01B0-42D6-8A8A-69EFD34EB413}"
@@ -19,16 +18,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BE238A6C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masterloop.Plugin.Device.Tests", "tests\Masterloop.Plugin.Device.Tests\Masterloop.Plugin.Device.Tests.csproj", "{302D52FF-7507-4E9F-B0AE-4B1E1BF7A0E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masterloop.Plugin.Device", "src\Masterloop.Plugin.Device\Masterloop.Plugin.Device.csproj", "{46F14305-42BE-44AD-944C-8122477B88EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{70DAF686-14A7-4017-AF2D-8330C7D0C99A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{70DAF686-14A7-4017-AF2D-8330C7D0C99A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{70DAF686-14A7-4017-AF2D-8330C7D0C99A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{70DAF686-14A7-4017-AF2D-8330C7D0C99A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F7B0ED83-01B0-42D6-8A8A-69EFD34EB413}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F7B0ED83-01B0-42D6-8A8A-69EFD34EB413}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7B0ED83-01B0-42D6-8A8A-69EFD34EB413}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -36,14 +33,17 @@ Global
 		{302D52FF-7507-4E9F-B0AE-4B1E1BF7A0E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{302D52FF-7507-4E9F-B0AE-4B1E1BF7A0E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{302D52FF-7507-4E9F-B0AE-4B1E1BF7A0E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{302D52FF-7507-4E9F-B0AE-4B1E1BF7A0E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46F14305-42BE-44AD-944C-8122477B88EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46F14305-42BE-44AD-944C-8122477B88EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46F14305-42BE-44AD-944C-8122477B88EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46F14305-42BE-44AD-944C-8122477B88EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{70DAF686-14A7-4017-AF2D-8330C7D0C99A} = {63132995-1D80-4630-A5EF-6C27AC240C51}
 		{F7B0ED83-01B0-42D6-8A8A-69EFD34EB413} = {2E75AAB5-F3AD-493A-A17F-4E45FF124EBC}
 		{302D52FF-7507-4E9F-B0AE-4B1E1BF7A0E9} = {BE238A6C-D226-4635-A889-F81C8B908F86}
+		{46F14305-42BE-44AD-944C-8122477B88EB} = {63132995-1D80-4630-A5EF-6C27AC240C51}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		version = 6.1.0
+		version = 6.2.0
 	EndGlobalSection
 EndGlobal

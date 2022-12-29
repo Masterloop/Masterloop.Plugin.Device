@@ -20,8 +20,9 @@ namespace Masterloop.Plugin.Device
         /// <param name="preSharedKey">Pre shared key for device.</param>
         /// <param name="hostName">Host to connect to, e.g. "myserver.example.com" or "10.0.0.2".</param>
         /// <param name="useHttps">True if using HTTPS (SSL/TLS), False if using HTTP (unencrypted).</param>
-        public ControllableDevice(string MID, String preSharedKey, String hostName, bool useHttps = true)
-            : base(MID, preSharedKey, hostName, useHttps)
+        /// <param name="port">Optional overriding of port number for HTTP(S) communication.</param>
+        public ControllableDevice(string MID, String preSharedKey, String hostName, bool useHttps = true, ushort? port = null)
+            : base(MID, preSharedKey, hostName, useHttps, port)
         {
         }
         #endregion

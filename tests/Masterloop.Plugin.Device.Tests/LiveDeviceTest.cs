@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Masterloop.Core.Types.Commands;
+using Masterloop.Plugin.Device;
 using Xunit;
 
 namespace Masterloop.Plugin.Device.Tests
@@ -16,6 +17,21 @@ namespace Masterloop.Plugin.Device.Tests
                 Assert.False(device.IsConnected());
                 Assert.True(device.Connect());
                 Assert.True(device.IsConnected());
+                device.Disconnect();
+                Assert.False(device.IsConnected());
+            }
+        }
+
+        [Fact]
+        public void SendDevicePulse()
+        {
+            using (LiveDevice device = GetLiveDevice())
+            {
+                Assert.NotNull(device);
+                Assert.False(device.IsConnected());
+                Assert.True(device.Connect());
+                Assert.True(device.IsConnected());
+                Assert.True(device.SendPulse(DateTime.UtcNow));
                 device.Disconnect();
                 Assert.False(device.IsConnected());
             }
