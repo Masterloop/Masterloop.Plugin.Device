@@ -24,4 +24,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Masterloop.Plugin.Device/Masterloop.Plugin.Device.csproj" />
+  </ItemGroup>
 </Project>
