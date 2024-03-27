@@ -23,7 +23,6 @@
     <Summary>Plugin to connect .NET/Mono/Core based devices to Masterloop Cloud Services</Summary>
     <Title>Masterloop.Plugin.Device</Title>
     <PackageId>Masterloop.Plugin.Device</PackageId>
-    <PackageIconUrl>http://masterloop.azurewebsites.net/Images/Masterloop_Symbol_Square_32x32.png</PackageIconUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>Masterloop.png</PackageIcon>
     <Configurations>Release;Debug</Configurations>
